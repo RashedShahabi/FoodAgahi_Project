@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
@@ -60,9 +61,6 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  // Note: After registration, users are redirected directly to dashboard
-  // so this useEffect is no longer needed for the "registered=true" message
-  // Keeping it for backward compatibility in case someone accesses /login?registered=true
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
       setSuccess("ثبت نام با موفقیت انجام شد. اکنون می‌توانید وارد شوید.")
@@ -167,37 +165,47 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" dir="rtl">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">ورود</CardTitle>
-          <CardDescription className="text-center">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cream py-12 px-4 sm:px-6 lg:px-8"
+      dir="rtl"
+    >
+      <Card className="w-full max-w-md shadow-xl border-none rounded-2xl bg-white">
+        <CardHeader className="space-y-2 pb-6">
+          <CardTitle className="text-3xl font-bold text-center text-orange-600">
+            ورود به فودآگهی
+          </CardTitle>
+          <CardDescription className="text-center text-gray-500 leading-7">
             {loginMethod === "password"
-              ? "با شماره موبایل و رمز عبور وارد شوید"
+              ? "خوش برگشتی! با شماره موبایل و رمز عبور وارد شو"
               : otpStep === "request"
-              ? "شماره موبایل خود را وارد کنید"
-              : "کد تایید ارسال شده را وارد کنید"}
+              ? "شماره موبایلت رو برای دریافت کد تایید وارد کن"
+              : "کد ۶ رقمی ارسال‌شده رو وارد کن"}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
               {success}
             </div>
           )}
 
           {/* Toggle Login Method */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-6 bg-orange-50 p-1 rounded-xl">
             <Button
               type="button"
-              variant={loginMethod === "password" ? "default" : "outline"}
-              className="flex-1"
+              variant="ghost"
+              className={`flex-1 rounded-lg transition-all ${
+                loginMethod === "password"
+                  ? "bg-white shadow-sm text-orange-600"
+                  : "text-gray-500"
+              }`}
               onClick={() => {
                 setLoginMethod("password")
                 setOtpStep("request")
@@ -205,19 +213,24 @@ export default function LoginPage() {
                 setError("")
               }}
             >
-              ورود با رمز عبور
+              رمز عبور
             </Button>
+
             <Button
               type="button"
-              variant={loginMethod === "otp" ? "default" : "outline"}
-              className="flex-1"
+              variant="ghost"
+              className={`flex-1 rounded-lg transition-all ${
+                loginMethod === "otp"
+                  ? "bg-white shadow-sm text-orange-600"
+                  : "text-gray-500"
+              }`}
               onClick={() => {
                 setLoginMethod("otp")
                 setMobileValue("")
                 setError("")
               }}
             >
-              ورود با کد یکبار مصرف
+              کد یکبار مصرف
             </Button>
           </div>
 
@@ -225,20 +238,20 @@ export default function LoginPage() {
             <Form {...passwordForm}>
               <form
                 onSubmit={passwordForm.handleSubmit(onPasswordLogin)}
-                className="space-y-4"
+                className="space-y-5"
               >
                 <FormField
                   control={passwordForm.control}
                   name="mobile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>شماره موبایل</FormLabel>
+                      <FormLabel className="text-gray-700">شماره موبایل</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="09123456789"
                           {...field}
                           dir="ltr"
-                          className="text-left"
+                          className="text-left h-12 rounded-xl border-gray-200 focus-visible:ring-orange-500"
                         />
                       </FormControl>
                       <FormMessage />
@@ -251,24 +264,35 @@ export default function LoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>رمز عبور</FormLabel>
+                      <FormLabel className="text-gray-700">رمز عبور</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="رمز عبور" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="رمز عبور"
+                          {...field}
+                          className="h-12 rounded-xl border-gray-200 focus-visible:ring-orange-500"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-xl transition-all"
+                  disabled={loading}
+                >
                   {loading ? "در حال ورود..." : "ورود"}
                 </Button>
               </form>
             </Form>
           ) : otpStep === "request" ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="text-sm font-medium leading-none">شماره موبایل</label>
+                <label className="text-sm font-medium leading-none text-gray-700 mb-2 block">
+                  شماره موبایل
+                </label>
                 <Input
                   placeholder="09123456789"
                   value={mobileValue || ""}
@@ -277,17 +301,17 @@ export default function LoginPage() {
                     setMobileValue(val)
                   }}
                   dir="ltr"
-                  className="text-left"
+                  className="text-left h-12 rounded-xl border-gray-200 focus-visible:ring-orange-500"
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
                 />
               </div>
 
-              <Button 
-                type="button" 
-                className="w-full" 
-                disabled={loading || mobileValue.length !== 11} 
+              <Button
+                type="button"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-xl transition-all"
+                disabled={loading || mobileValue.length !== 11}
                 onClick={() => onOtpRequest(mobileValue)}
               >
                 {loading ? "در حال ارسال..." : "ارسال کد تایید"}
@@ -297,11 +321,10 @@ export default function LoginPage() {
             <Form {...otpVerifyForm}>
               <form
                 onSubmit={otpVerifyForm.handleSubmit(onOtpVerify)}
-                className="space-y-4"
+                className="space-y-5"
               >
-                <div className="text-sm text-gray-600 mb-4">
-                  کد تایید به شماره <span className="font-bold">{mobileValue}</span> ارسال
-                  شد
+                <div className="text-sm text-gray-600 mb-2 text-center leading-7">
+                  کد تایید به شماره <span className="font-bold">{mobileValue}</span> ارسال شد
                 </div>
 
                 <FormField
@@ -309,7 +332,7 @@ export default function LoginPage() {
                   name="code"
                   render={({ field }) => (
                     <FormItem className="flex flex-col items-center justify-center space-y-4">
-                      <FormLabel>کد تایید ۶ رقمی</FormLabel>
+                      <FormLabel className="text-gray-700">کد تایید ۶ رقمی</FormLabel>
                       <FormControl>
                         <div dir="ltr" className="w-full flex justify-center">
                           <InputOTP
@@ -333,14 +356,18 @@ export default function LoginPage() {
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-xl transition-all"
+                  disabled={loading}
+                >
                   {loading ? "در حال تایید..." : "تایید و ورود"}
                 </Button>
 
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="w-full rounded-xl py-6"
                   onClick={(e) => {
                     e.preventDefault()
                     handleBackToOtpRequest()
@@ -353,11 +380,11 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <div className="text-center text-sm mt-4">
+          <div className="text-center text-sm mt-6">
             <span className="text-gray-600">حساب کاربری ندارید؟ </span>
-            <a href="/register" className="text-primary hover:underline">
-              ثبت نام
-            </a>
+            <Link href="/register" className="text-orange-600 font-bold hover:underline">
+              ثبت‌نام رایگان
+            </Link>
           </div>
         </CardContent>
       </Card>
