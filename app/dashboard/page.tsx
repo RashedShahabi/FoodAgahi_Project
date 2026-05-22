@@ -1,12 +1,25 @@
-// app/dashboard/page.tsx
 "use client";
 
+import { useState, useEffect } from "react";
+import { getProfileCompletion } from "./actions/profile"; // مسیر فایل اکشن شما
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function DashboardPage() {
-  const profileCompletion = 65; // این مقدار را بعداً از دیتابیس می‌خوانیم
+  const [profileCompletion, setProfileCompletion] = useState(0);
+
+  useEffect(() => {
+    async function loadCompletion() {
+      try {
+        const percentage = await getProfileCompletion();
+        setProfileCompletion(percentage);
+      } catch (error) {
+        console.error("خطا در دریافت درصد پروفایل:", error);
+      }
+    }
+    loadCompletion();
+  }, []);
 
   return (
     <div className="space-y-8 p-6" dir="rtl">
@@ -32,9 +45,9 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* شبکه ۴ بخشی */}
+      {/* شبکه کارت‌ها */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* ۱. ثبت آگهی جدید */}
+        {/* ۱. تکمیل پروفایل */}
         <Card>
           <CardHeader>
             <CardTitle>تکمیل پروفایل کاربری</CardTitle>
@@ -46,7 +59,8 @@ export default function DashboardPage() {
             </Button>
           </CardContent>
         </Card>
-        {/* ۱. ثبت آگهی جدید */}
+
+        {/* ۲. ثبت آگهی جدید */}
         <Card>
           <CardHeader>
             <CardTitle>ثبت آگهی جدید</CardTitle>
@@ -59,45 +73,44 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* ۲. مشاهده سفارش‌های من (Buyer Orders) */}
+        {/* ۳. سفارش‌های من */}
         <Card>
           <CardHeader>
             <CardTitle>سفارش‌های من</CardTitle>
             <CardDescription>نمایش آگهی‌ها و خریدهای انجام شده</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild  className="w-full  bg-orange-500 hover:bg-orange-600">
+            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
               <Link href="/dashboard/seller/my-ads">مشاهده سفارش‌ها</Link>
             </Button>
           </CardContent>
         </Card>
 
-        {/* ۳. کیف پول */}
+        {/* ۴. کیف پول */}
         <Card>
           <CardHeader>
             <CardTitle>کیف پول</CardTitle>
             <CardDescription>مدیریت موجودی و تراکنش‌ها</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full  bg-orange-500 hover:bg-orange-600">
+            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
               <Link href="/dashboard/wallet">مشاهده کیف پول</Link>
             </Button>
           </CardContent>
         </Card>
 
-        {/* ۴. مشاهده سفارش‌های فروشنده (Seller Orders) */}
+        {/* ۵. مشاهده آگهی‌ها */}
         <Card>
           <CardHeader>
             <CardTitle>مشاهده آگهی ها</CardTitle>
             <CardDescription>مدیریت آگهی‌های ثبت شده شما</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild  className="w-full  bg-orange-500 hover:bg-orange-600">
+            <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
               <Link href="/dashboard/buyer">دیدن لیست آگهی های موجود</Link>
             </Button>
           </CardContent>
         </Card>
-
       </div>
     </div>
   );
