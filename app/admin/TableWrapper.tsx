@@ -1,4 +1,10 @@
-export default function TableWrapper({ children }) {
+import React from "react";
+
+interface TableWrapperProps {
+  children: React.ReactNode;
+}
+
+export default function TableWrapper({ children }: TableWrapperProps) {
   return (
     <div className="bg-white shadow rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
