@@ -171,10 +171,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async authorized({ request, auth }) {
-      // این بخش مخصوص route handler های server component نیست
-      return true;
-    },
+   
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
