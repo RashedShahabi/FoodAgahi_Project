@@ -1,7 +1,11 @@
 "use client";
+interface DeleteModalProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}
 
-export default function DeleteModal({ isOpen, onConfirm, onClose }) {
-  if (!isOpen) return null;
+export default function DeleteModal({ isOpen, onConfirm, onClose }: DeleteModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
