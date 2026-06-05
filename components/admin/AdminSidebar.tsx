@@ -34,7 +34,12 @@ export default function AdminSidebar() {
       <nav className="p-4 space-y-2">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href;
+
+          // ✅ اصلاح منطق active
+          const active =
+            item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(item.href);
 
           return (
             <Link

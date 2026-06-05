@@ -1,10 +1,11 @@
+"use client"
+
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { blockUser, deleteUser } from "./actions";
 
 const PAGE_SIZE = 10;
 
-// تعریف اینترفیس برای ورودی‌های صفحه
 interface UsersPageProps {
   searchParams: {
     page?: string;
