@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// This is your Prisma schema file
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,19 +14,19 @@ enum UserRole {
 }
 
 enum OrderStatus {
-  PENDING           // در انتظار تایید فروشنده
-  CONFIRMED         // تایید شده توسط فروشنده
-  COMPLETED         // تکمیل شده (خریدار دریافت را تایید کرد)
-  CANCELLED         // لغو شده
-  DISPUTED          // در حال اختلاف
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  DISPUTED
 }
 
 enum TransactionType {
-  WALLET_CHARGE     // شارژ کیف پول
-  FOOD_PURCHASE     // خرید غذا
-  FOOD_SALE         // فروش غذا
-  WITHDRAWAL        // برداشت وجه
-  REFUND            // بازگشت وجه
+  WALLET_CHARGE
+  FOOD_PURCHASE
+  FOOD_SALE
+  WITHDRAWAL
+  REFUND
 }
 
 enum TransactionStatus {
@@ -38,112 +36,118 @@ enum TransactionStatus {
 }
 
 enum MealType {
-  LUNCH             // ناهار
-  DINNER            // شام
+  LUNCH
+  DINNER
+}
+
+enum AdStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model User {
-  id                    String    @id @default(cuid())
-  mobile                String    @unique
-  password              String
-  role                  UserRole  @default(STUDENT)
-  isActive              Boolean   @default(true)
-  
-  // امنیت و احراز هویت
-  failedLoginAttempts   Int       @default(0)
-  lockUntil             DateTime?
-  
-  // کیف پول ساده
-  balance               Float     @default(0)
-  
-  // تاریخ‌ها
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  
-  // روابط
-  studentIds            StudentId[]
-  ibans                 Iban[]
-  otpCodes              OtpCode[]
-  foodAds               FoodAd[]
-  purchaseOrders        Order[]   @relation("Buyer")
-  saleOrders            Order[]   @relation("Seller")
-  transactions          Transaction[]
-  warnings              Warning[]
-  
+  id       String   @id @default(cuid())
+  mobile   String   @unique
+  password String
+  role     UserRole @default(STUDENT)
+  isActive Boolean  @default(true)
+
+  failedLoginAttempts Int       @default(0)
+  lockUntil           DateTime?
+
+  balance Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentIds     StudentId[]
+  ibans          Iban[]
+  otpCodes       OtpCode[]
+  foodAds        FoodAd[]
+  purchaseOrders Order[]       @relation("Buyer")
+  saleOrders     Order[]       @relation("Seller")
+  transactions   Transaction[]
+  warnings       Warning[]
+
+  // ✅ اضافه شد (برای Report)
+  reports Report[]
+
   @@map("users")
 }
 
 model OtpCode {
-  id                String    @id @default(cuid())
-  mobile            String
-  code              String
-  expiresAt         DateTime
-  isUsed            Boolean   @default(false)
-  
-  userId            String?
-  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime  @default(now())
-  
+  id        String   @id @default(cuid())
+  mobile    String
+  code      String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([mobile])
   @@index([expiresAt])
   @@map("otp_codes")
 }
 
 model StudentId {
-  id                String    @id @default(cuid())
-  userId            String
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  studentNumber     String
-  
-  createdAt         DateTime  @default(now())
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studentNumber String
+
+  createdAt DateTime @default(now())
+
   @@unique([userId, studentNumber])
   @@index([userId])
   @@map("student_ids")
 }
 
 model Iban {
-  id                String    @id @default(cuid())
-  userId            String
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  ibanNumber        String
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ibanNumber String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([userId, ibanNumber])
   @@index([userId])
   @@map("ibans")
 }
 
 model FoodAd {
-  id                String    @id @default(cuid())
-  sellerId          String
-  seller            User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  
-  // اطلاعات غذا
-  foodName          String
-  price             Float
-  description       String?
-  imageUrl          String?
-  mealType          MealType
-  mealDate          DateTime  // تاریخ وعده غذایی
-  
-  // وضعیت
-  isAvailable       Boolean   @default(true)
-  isSold            Boolean   @default(false)
-  
-  // تاریخ‌ها
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  expiresAt         DateTime  // زمان انقضای آگهی
-  
-  // روابط
-  orders            Order[]
-  
+  id       String @id @default(cuid())
+  sellerId String
+  seller   User   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  foodName    String
+  price       Float
+  description String?
+  imageUrl    String?
+  mealType    MealType
+  mealDate    DateTime
+
+  status AdStatus @default(PENDING)
+
+  isAvailable Boolean @default(true)
+  isSold      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+
+  orders Order[]
+
+  // ✅ اضافه شد (برای Report)
+  reports Report[]
+
   @@index([sellerId])
   @@index([mealDate])
   @@index([isAvailable])
@@ -151,45 +155,38 @@ model FoodAd {
 }
 
 model Order {
-  id                String        @id @default(cuid())
-  
-  // خریدار و فروشنده
-  buyerId           String
-  buyer             User          @relation("Buyer", fields: [buyerId], references: [id])
-  sellerId          String
-  seller            User          @relation("Seller", fields: [sellerId], references: [id])
-  
-  // آگهی غذا
-  foodAdId          String
-  foodAd            FoodAd        @relation(fields: [foodAdId], references: [id])
-  
-  // اطلاعات مالی
-  basePrice         Float         // قیمت پایه (P)
-  buyerFee          Float         // کارمزد خریدار
-  sellerFee         Float         // کارمزد فروشنده
-  totalPaid         Float         // مبلغ کل پرداختی خریدار
-  sellerReceives    Float         // مبلغ دریافتی فروشنده
-  platformProfit    Float         // سود سامانه
-  
-  // شماره دانشجویی خریدار برای انتقال
-  buyerStudentId    String
-  
-  // وضعیت
-  status            OrderStatus   @default(PENDING)
-  
-  // اسکرین‌شات تایید انتقال از سوی فروشنده
+  id String @id @default(cuid())
+
+  buyerId String
+  buyer   User   @relation("Buyer", fields: [buyerId], references: [id])
+
+  sellerId String
+  seller   User   @relation("Seller", fields: [sellerId], references: [id])
+
+  foodAdId String
+  foodAd   FoodAd @relation(fields: [foodAdId], references: [id])
+
+  basePrice      Float
+  buyerFee       Float
+  sellerFee      Float
+  totalPaid      Float
+  sellerReceives Float
+  platformProfit Float
+
+  buyerStudentId String
+
+  status OrderStatus @default(PENDING)
+
   transferScreenshot String?
-  
-  // تاریخ‌ها
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  confirmedAt       DateTime?     // زمان تایید توسط فروشنده
-  completedAt       DateTime?     // زمان تایید دریافت توسط خریدار
-  
-  // روابط
-  transactions      Transaction[]
-  dispute           Dispute?
-  
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  completedAt DateTime?
+
+  transactions Transaction[]
+  dispute      Dispute?
+
   @@index([buyerId])
   @@index([sellerId])
   @@index([foodAdId])
@@ -198,31 +195,24 @@ model Order {
 }
 
 model Transaction {
-  id                String              @id @default(cuid())
-  userId            String
-  user              User                @relation(fields: [userId], references: [id])
-  
-  // نوع و وضعیت
-  type              TransactionType
-  status            TransactionStatus   @default(PENDING)
-  
-  // مبلغ
-  amount            Float
-  
-  // سفارش مرتبط (در صورت وجود)
-  orderId           String?
-  order             Order?              @relation(fields: [orderId], references: [id])
-  
-  // توضیحات
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  type   TransactionType
+  status TransactionStatus @default(PENDING)
+
+  amount Float
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
+
   description       String?
-  
-  // اطلاعات پرداخت
-  paymentGatewayRef String?             // شماره رفرنس درگاه پرداخت
-  
-  // تاریخ‌ها
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  
+  paymentGatewayRef String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([orderId])
   @@index([type])
@@ -231,42 +221,74 @@ model Transaction {
 }
 
 model Dispute {
-  id                String    @id @default(cuid())
-  orderId           String    @unique
-  order             Order     @relation(fields: [orderId], references: [id])
-  
-  // توضیحات اختلاف
-  buyerReason       String    // دلیل خریدار
-  sellerResponse    String?   // پاسخ فروشنده
-  
-  // تصمیم مدیر
-  adminDecision     String?   // تصمیم نهایی مدیر
-  resolvedInFavorOf String?   // BUYER یا SELLER
-  
-  // وضعیت
-  isResolved        Boolean   @default(false)
-  
-  // تاریخ‌ها
-  createdAt         DateTime  @default(now())
-  resolvedAt        DateTime?
-  
+  id      String @id @default(cuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  buyerReason    String
+  sellerResponse String?
+
+  adminDecision     String?
+  resolvedInFavorOf String?
+
+  isResolved Boolean @default(false)
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
   @@index([orderId])
   @@index([isResolved])
   @@map("disputes")
 }
 
 model Warning {
-  id                String    @id @default(cuid())
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  
-  // دلیل اخطار
-  reason            String
-  description       String?
-  
-  // تاریخ
-  createdAt         DateTime  @default(now())
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  reason      String
+  description String?
+
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@map("warnings")
+}
+
+// ادمین
+model Report {
+  id String @id @default(cuid())
+
+  reporterId String
+  reporter   User   @relation(fields: [reporterId], references: [id])
+
+  foodAdId String
+  foodAd   FoodAd @relation(fields: [foodAdId], references: [id])
+
+  reason      String
+  description String?
+
+  isResolved Boolean @default(false)
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([reporterId])
+  @@index([foodAdId])
+  @@map("reports")
+}
+
+model Banner {
+  id String @id @default(cuid())
+
+  title    String
+  imageUrl String
+  link     String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banners")
 }
