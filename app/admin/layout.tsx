@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { ReactNode } from "react";
 import ThemeToggle from "@/components/admin/ThemeToggle";
 import AdminSidebar from "@/components/admin/AdminSidebar";
